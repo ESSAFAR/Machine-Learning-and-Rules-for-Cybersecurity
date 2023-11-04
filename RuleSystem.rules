@@ -1,0 +1,11 @@
+# Règle 1 : Correspond aux paquets TCP avec un TTL source inférieur ou égal à 61 et un temps d'inter-arrivée inférieur ou égal à 0.00 secondes
+alert tcp any any -> any any (sttl: <= 61; sinpkt: <= 0.00; msg: "Classe 1"; sid: 10001;)
+
+# Règle 2 : Correspond aux paquets TCP avec un TTL source inférieur ou égal à 61 et un temps d'inter-arrivée supérieur à 0.00 secondes
+alert tcp any any -> any any (sttl: <= 61; sinpkt: > 0.00; msg: "Classe 0"; sid: 10002;)
+
+# Règle 3 : Correspond aux paquets TCP avec un TTL source supérieur à 61 et un temps de réponse SYN-ACK inférieur ou égal à 0.04 secondes
+alert tcp any any -> any any (sttl: > 61; synack: <= 0.04; msg: "Classe 1"; sid: 10003;)
+
+# Règle 4 : Correspond aux paquets TCP avec un TTL source supérieur à 61 et un temps de réponse SYN-ACK supérieur à 0.04 secondes
+alert tcp any any -> any any (sttl: > 61; synack: > 0.04; msg: "Classe 1"; sid: 10004;)
