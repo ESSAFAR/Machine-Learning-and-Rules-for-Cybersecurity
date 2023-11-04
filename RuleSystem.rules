@@ -1,11 +1,31 @@
-# Règle 1 : Correspond aux paquets TCP avec un TTL source inférieur ou égal à 61 et un temps d'inter-arrivée inférieur ou égal à 0.00 secondes
-alert tcp any any -> any any (sttl: <= 61; sinpkt: <= 0.00; msg: "Classe 1"; sid: 10001;)
+# Syntaxe : alert [protocole] [source_ip source_port -> dest_ip dest_port] ([options];) msg:"Votre Message"; sid: [SID];
 
-# Règle 2 : Correspond aux paquets TCP avec un TTL source inférieur ou égal à 61 et un temps d'inter-arrivée supérieur à 0.00 secondes
-alert tcp any any -> any any (sttl: <= 61; sinpkt: > 0.00; msg: "Classe 0"; sid: 10002;)
+# Règle 1 : Correspond aux tentatives de scan de ports SYN
+alert tcp any any -> $HOME_NET any (flags: S; msg: "Tentative de Scan de Ports SYN"; sid: 1001;)
 
-# Règle 3 : Correspond aux paquets TCP avec un TTL source supérieur à 61 et un temps de réponse SYN-ACK inférieur ou égal à 0.04 secondes
-alert tcp any any -> any any (sttl: > 61; synack: <= 0.04; msg: "Classe 1"; sid: 10003;)
+# Règle 2 : Correspond aux requêtes HTTP contenant le mot "attaque"
+alert tcp $EXTERNAL_NET any -> $HTTP_SERVERS $HTTP_PORTS (msg:"Détection de Mot Clé - Attaque"; content:"attaque"; http_uri; sid: 1002;)
 
-# Règle 4 : Correspond aux paquets TCP avec un TTL source supérieur à 61 et un temps de réponse SYN-ACK supérieur à 0.04 secondes
-alert tcp any any -> any any (sttl: > 61; synack: > 0.04; msg: "Classe 1"; sid: 10004;)
+# Règle 3 : Correspond aux tentatives de connexion SSH échouées
+alert tcp $EXTERNAL_NET any -> $HOME_NET 22 (msg:"Tentative de Connexion SSH Échouée"; flags: A+; sid: 1003;)
+
+# Règle 4 : Correspond aux requêtes DNS pour des domaines suspects
+alert udp any any -> $DNS_SERVERS 53 (msg:"Requête DNS vers un Domaine Suspect"; content:"|05|malware|03|com"; sid: 1004;)
+
+# Règle 5 : Correspond aux paquets ICMP Echo Request (ping) sortants
+alert icmp $HOME_NET any -> $EXTERNAL_NET any (icmp_type: 8; msg:"Ping sortant détecté"; sid: 1005;)
+
+
+#-------------------------
+
+# Règle 5 : Correspond aux paquets TCP avec un TTL source inférieur ou égal à 61 et un temps d'inter-arrivée inférieur ou égal à 0.00 secondes
+alert tcp any any -> any any (sttl: <= 61; sinpkt: <= 0.00; msg: "Classe 1"; sid: 10005;)
+
+# Règle 6 : Correspond aux paquets TCP avec un TTL source inférieur ou égal à 61 et un temps d'inter-arrivée supérieur à 0.00 secondes
+alert tcp any any -> any any (sttl: <= 61; sinpkt: > 0.00; msg: "Classe 0"; sid: 10006;)
+
+# Règle 7 : Correspond aux paquets TCP avec un TTL source supérieur à 61 et un temps de réponse SYN-ACK inférieur ou égal à 0.04 secondes
+alert tcp any any -> any any (sttl: > 61; synack: <= 0.04; msg: "Classe 1"; sid: 10007;)
+
+# Règle 8 : Correspond aux paquets TCP avec un TTL source supérieur à 61 et un temps de réponse SYN-ACK supérieur à 0.04 secondes
+alert tcp any any -> any any (sttl: > 61; synack: > 0.04; msg: "Classe 1"; sid: 10008;)
